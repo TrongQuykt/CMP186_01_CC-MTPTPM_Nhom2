@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tạo người dùng nhân viên</title>
+</head>
+<body>
+<h1>Tạo người dùng nhân viên</h1>
+<form th:action="@{/admin/createstaff}" th:object="${user}" method="post">
+    <div>
+        <label for="username">Tên đăng nhập:</label>
+        <input type="text" id="username" th:field="*{username}">
+    </div>
+    <div>
+        <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" th:field="*{password}">
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}">
+    </div>
+    <div>
+        <label for="phone">Số điện thoại:</label>
+        <input type="text" id="phone" th:field="*{phone}">
+    </div>
+    <button type="submit">Tạo</button>
+</form>
+<div th:if="${errorMessage}">
+    <p th:text="${errorMessage}"></p>
+</div>
+<div th:if="${successMessage}">
+    <p th:text="${successMessage}"></p>
+</div>
+<a href="/admin/adminuserslist">Quay lại danh sách người dùng</a>
+</body>
+</html>

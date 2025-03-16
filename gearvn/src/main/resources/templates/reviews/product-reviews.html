@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Reviews</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<h1>Product Reviews</h1>
+<ul>
+    <li th:each="review : ${reviews}">
+        <p>Rating: <span th:text="${review.rating}"></span></p>
+        <p>Comment: <span th:text="${review.comment}"></span></p>
+        <p>By: <span th:text="${review.user.username}"></span></p>
+    </li>
+</ul>
+<form th:action="@{/reviews/add}" method="post">
+    <input type="hidden" th:value="${productId}" name="product.id"/>
+    <input type="hidden" th:value="${#authentication.principal.username}" name="user.username"/>
+    <label for="rating">Rating:</label>
+    <input type="number" id="rating" name="rating" min="1" max="5"/>
+    <label for="comment">Comment:</label>
+    <textarea id="comment" name="comment"></textarea>
+    <button type="submit">Submit Review</button>
+</form>
+</body>
+</html>

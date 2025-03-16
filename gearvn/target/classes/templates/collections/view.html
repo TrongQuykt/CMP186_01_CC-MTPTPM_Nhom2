@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security5"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title th:text="${title} ?: 'GEARVN - Máy Tính Cao Cấp & Thiết Bị Chơi Game Hàng Đầu Tại Việt Nam '">Sản phẩm theo danh mục</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
+    <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.min.css">
+    <link rel="icon" href="/static/ava/logofavicon.png">
+    <meta name="csrf-token" th:content="${_csrf.token}"/>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #343a40;
+
+        }
+        .navbar-custom {
+            position: sticky;
+            background-color: #e60000;
+            color: white;
+            padding: 1px 0;
+            top: 0;
+            z-index: 4;
+        }
+        .navbar-nav {
+            white-space: nowrap; /* Ngăn không cho các phần tử xuống dòng */
+        }
+
+       .navbar-nav .nav-link {
+            padding: 10px; /* Khoảng cách lề cho từng mục */
+        }
+        .navbar-custom .nav-link, .navbar-custom .navbar-brand {
+            color: white;
+            text-align: center;
+        }
+        .navbar-brand {
+            display: inline-block;
+            width: 280px;
+            max-height: auto;
+        }
+        .navbar-brand img {
+            width: 180px;
+            height: 50px;
+        }
+        .top-banner, .side-banner, .carousel-item img {
+            width: 100%;
+            height: auto;
+        }
+        .product-card {
+            transition: transform 0.2s;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #fff;
+        }
+        .product-card:hover {
+            transform: scale(1.05);
+        }
+        .product-title {
+            height: 50px;
+            overflow: hidden;
+        }
+        .footer-custom {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+        }
+
+        .footer-custom h7 {
+            font-weight: bold;
+            margin-bottom: 15px;
+            white-space: nowrap;
+        }
+
+        .footer-custom ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-custom ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-custom ul li a {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .footer-custom ul li a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-custom .shipping-icons,
+        .footer-custom .payment-icons,
+        .footer-custom .social-icons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .footer-custom .shipping-icons img,
+        .footer-custom .payment-icons img,
+        .footer-custom .social-icons img {
+            max-height: 30px;
+        }
+
+        .footer-custom .social-icons a img {
+            max-height: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .footer-custom .social-icons a img:hover {
+            transform: scale(1.1);
+        }
+
+        .sharp-image {
+        filter: contrast(80%) brightness(100%);
+        }
+        /* Thanh cuộn trên trình duyệt Webkit (Chrome, Safari) */
+        ::-webkit-scrollbar {
+          width: 16px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: #333;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background-color: #00CC33;
+          border-radius: 10px;
+          border: 2px solid #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background-color: #6633CC;
+        }
+        .navigation-bar {
+    width: 80%;
+    margin: 0 auto;
+    background-color: #f2f2f2;
+    padding: 10px 0;
+}
+
+.navigation-bar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    justify-content: center;
+}
+
+.navigation-bar li {
+    position: relative;
+    margin-right: 10px;
+}
+
+.navigation-bar a {
+    text-decoration: none;
+    padding: 8px 16px;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.navigation-bar a.selected {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.navigation-bar a:hover {
+    background-color: #ddd;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #f2f2f2;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 0;
+}
+
+.dropdown-menu li {
+    margin: 0;
+    list-style-type: none;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 8px 16px;
+    color: #333;
+    border: none;
+    border-radius: 0;
+}
+
+.dropdown-menu a:hover {
+    background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+                .breadcrumb-container {
+                    display: flex;
+                    justify-content: center;
+                    margin-top: 20px; /* Tạo khoảng cách trên dưới nếu cần */
+                }
+
+                .breadcrumb {
+                    list-style: none;
+                    display: flex;
+                    padding: 0;
+                    margin: 0;
+                    font-size: 18px;
+                }
+
+                .breadcrumb li {
+                    margin-right: 5px;
+                }
+
+                .breadcrumb li a {
+                    text-decoration: none;
+                    color: #007bff;
+                }
+
+                .breadcrumb li a:hover {
+                    text-decoration: underline;
+                }
+
+                .breadcrumb li::after {
+                    content: '/';
+                    margin-left: 5px;
+                }
+
+                .breadcrumb li:last-child::after {
+                    content: '';
+                }
+
+                .breadcrumb li:last-child {
+                    color: gray;
+                }
+
+    </style>
+</head>
+<body>
+<!-- Top Banner -->
+<div class="container-fluid p-0">
+    <img id="bannerImage" src="/static/ava/bannerTop.webp" class="top-banner active" alt="Top Banner">
+</div>
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container d-flex justify-content-center"> <!-- Thêm class justify-content-center để căn giữa -->
+        <!-- Logo -->
+        <a class="navbar-brand me-auto" href="/">
+            <img src="/static/ava/logonav.svg" alt="Gearvn Logo">
+        </a>
+        <!-- Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Main Navbar -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+            <ul class="navbar-nav mx-2">
+
+                <!-- Danh mục -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="toggleMenu()">
+                        <svg width="22" height="20" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="-0.00012207" y="0.000190735" width="18" height="2" rx="1" fill="white"></rect>
+                            <rect x="-0.00012207" y="5.99999" width="18" height="2" rx="1" fill="white"></rect>
+                            <rect x="-0.00012207" y="12.0001" width="18" height="2" rx="1" fill="white"></rect>
+                        </svg> Danh mục</a>
+                </li>
+            </ul>
+
+            <!-- Search Form -->
+            <form class="d-flex mx-2">
+                <input class="form-control me-2" type="search" placeholder="Bạn cần tìm gì?" aria-label="Search" style="width: 350px;">
+                <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+
+
+            <!-- Giỏ hàng, Đăng nhập -->
+            <ul class="navbar-nav mx-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-headset" viewBox="0 0 16 16">
+                            <path d="M8 1a5 5 0 0 0-5 5v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a6 6 0 1 1 12 0v6a2.5 2.5 0 0 1-2.5 2.5H9.366a1 1 0 0 1-.866.5h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 .866.5H11.5A1.5 1.5 0 0 0 13 12h-1a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1V6a5 5 0 0 0-5-5"/>
+                        </svg> Hotline 1900.5301</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://gearvn.com/pages/he-thong-showroom-gearvn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+                            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                        </svg> Hệ thống Showroom</a>
+                </li>
+                <li class="nav-item position-relative">
+                    <a class="nav-link" href="/cart" style="position: relative;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                        </svg>
+                        Giỏ hàng
+                    </a>
+                </li>
+
+                <li class="nav-item d-flex align-items-center dropdown" sec:authorize="isAuthenticated()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+                    </svg>
+                    <span class="navbar-text text-white"> Xin chào,
+                        <span sec:authentication="name" style="margin-right:20px;"></span>
+                    </span>
+                    <ul class="dropdown-menu">
+                        <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
+                            <form th:action="@{/logout}" method="post">
+                                <button class="btn btn-outline-light dropdown-item" type="submit">Logout</button>
+                            </form>
+                        </li>
+                        <li class="nav-item d-flex align-items-center" sec:authorize="!isAuthenticated()">
+                            <form th:action="@{/profile}" method="post">
+                                <button class="btn btn-outline-light dropdown-item" type="submit">Profile</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item d-flex align-items-center" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/login}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+                        </svg></a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Thanh navbar màu trắng -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNavAlt">
+            <ul class="navbar-nav" style=" margin: 0 20px;">
+                <!-- Săn voucher -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: black;">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3.95453" y="3.95454" width="2.27273" height="2.27273" rx="1.13636" stroke="currentcolor"></rect>
+                            <path d="M9.18179 11.6364L12.4545 14.9091" stroke="currentcolor" stroke-linecap="round"></path>
+                            <path d="M10 7.54546L14.9091 12.4545" stroke="currentcolor" stroke-linecap="round"></path>
+                            <path d="M10.2227 17.6407L1.61378 9.3629C1.22163 8.98583 1 8.46527 1 7.92124V4.28297C1 3.75254 1.21071 3.24383 1.58579 2.86876L2.86876 1.58579C3.24383 1.21071 3.75254 1 4.28297 1H7.92124C8.46527 1 8.98583 1.22163 9.3629 1.61378L13.8864 6.31818L17.6407 10.2227C18.3957 11.0079 18.3835 12.2529 17.6132 13.0231L13.0231 17.6132C12.2529 18.3835 11.0079 18.3957 10.2227 17.6407Z" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg> Săn voucher gearvn</a>
+                </li>
+                <!-- Tin công nghệ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: black;">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14.5 3.25H17.875C18.1734 3.25 18.4595 3.36853 18.6705 3.5795C18.8815 3.79048 19 4.07663 19 4.375V16.75C19 17.3467 18.7629 17.919 18.341 18.341C17.919 18.7629 17.3467 19 16.75 19M16.75 19C16.1533 19 15.581 18.7629 15.159 18.341C14.7371 17.919 14.5 17.3467 14.5 16.75V2.125C14.5 1.82663 14.3815 1.54048 14.1705 1.32951C13.9595 1.11853 13.6734 1 13.375 1H2.125C1.82663 1 1.54048 1.11853 1.32951 1.32951C1.11853 1.54048 1 1.82663 1 2.125V15.625C1 16.5201 1.35558 17.3786 1.98851 18.0115C2.62145 18.6444 3.47989 19 4.375 19H16.75Z" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M4 11.5L11 11.5" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M4 15L11 15" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <rect x="4" y="5" width="7" height="3" rx="1" stroke="currentcolor"></rect>
+                        </svg> Tin công nghệ</a>
+                </li>
+                <!-- Video -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: black;">
+                        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16.5284 1.31948C16.0412 0.967549 14.6837 0.5 8.99522 0.5C2.89942 0.5 1.99504 1.03692 1.7048 1.2126C0.160125 2.14402 0.0134681 6.26764 0 7.10376C0.0185428 8.20809 0.196385 11.8822 1.70369 12.7911C1.99337 12.9662 2.89268 13.5 8.99522 13.5C14.6873 13.5 16.0432 13.0347 16.5284 12.6842C17.8449 11.7336 17.9963 8.45989 18 7.08941C17.9966 5.98737 17.8814 2.29774 16.5284 1.3195L16.5284 1.31948ZM15.8721 11.7688C15.6763 11.9104 14.5518 12.372 8.99519 12.372C3.62312 12.372 2.49594 11.9535 2.28298 11.8246C1.74074 11.4981 1.16844 9.76467 1.12351 7.10066C1.1679 4.44256 1.74806 2.50215 2.28414 2.17955C2.49766 2.05011 3.62903 1.62825 8.99519 1.62825C14.5474 1.62825 15.6748 2.09299 15.8721 2.23512C16.3533 2.5831 16.8686 4.41495 16.8762 7.09306C16.8686 9.81319 16.35 11.4237 15.8721 11.7688H15.8721ZM12.6597 6.55639L7.60369 3.44229C7.51846 3.3907 7.4211 3.36276 7.32158 3.36133C7.22206 3.35989 7.12395 3.38501 7.03727 3.43411C6.95052 3.48322 6.87832 3.55459 6.82807 3.6409C6.77782 3.72721 6.75131 3.82538 6.75127 3.92535V10.1546C6.75134 10.3042 6.81056 10.4476 6.91593 10.5534C7.02129 10.6591 7.16417 10.7185 7.31317 10.7186C7.41544 10.7186 7.51577 10.6907 7.60337 10.6377L12.6594 7.52249C12.828 7.42014 12.9311 7.23714 12.9311 7.03944C12.9311 6.84175 12.8282 6.65819 12.6597 6.55639H12.6597ZM7.87537 9.15552V4.92388L11.2819 7.03941L7.87537 9.15552Z" fill="currentcolor"></path>
+                        </svg> Video</a>
+                </li>
+                <!-- Hướng dẫn thanh toán -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: black;">
+                        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="1" y="0.5" width="18" height="13" rx="2.5" stroke="currentcolor"></rect>
+                            <rect x="1.25" y="3" width="18" height="2" fill="currentcolor"></rect>
+                        </svg> Hướng dẫn thanh toán</a>
+                </li>
+                <!-- Hướng dẫn trả góp -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: black;">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 5.69566V8.04349C18 9.06087 15.6495 10.3913 12.75 10.3913C9.8505 10.3913 7.5 9.06087 7.5 8.04349V5.69566" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M18 8.43477V10.7826C18 11.8 15.6495 13.1304 12.75 13.1304C9.8505 13.1304 7.5 11.8 7.5 10.7826V8.43477" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M18 3.34782V5.69565C18 6.71304 15.6495 8.04347 12.75 8.04347C9.8505 8.04347 7.5 6.71304 7.5 5.69565V3.34782" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <mask id="mask0_5669_936" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="1" width="8" height="15">
+                                <rect y="1.78261" width="7.50001" height="13.3043" fill="#C4C4C4"></rect>
+                            </mask>
+                            <g mask="url(#mask0_5669_936)">
+                                <path d="M11.25 8.82608V11.1739C11.25 12.1913 8.89949 13.5217 6 13.5217C3.1005 13.5217 0.75 12.1913 0.75 11.1739V8.82608" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M11.25 6.47827V8.82609C11.25 9.84348 8.89949 11.1739 6 11.1739C3.1005 11.1739 0.75 9.84348 0.75 8.82609V6.47827" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M6 8.81354C8.89949 8.81354 11.25 7.55667 11.25 6.47667C11.25 5.39589 8.89949 4.13042 6 4.13042C3.1005 4.13042 0.75 5.39589 0.75 6.47667C0.75 7.55667 3.1005 8.81354 6 8.81354Z" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </g>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.75 5.68312C15.6495 5.68312 18 4.42626 18 3.34626C18 2.26548 15.6495 1 12.75 1C9.8505 1 7.5 2.26548 7.5 3.34626C7.5 4.42626 9.8505 5.68312 12.75 5.68312Z" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <rect x="3.5" y="6.97827" width="11" height="11.5217" rx="5.5" fill="white" stroke="currentcolor"></rect>
+                            <path d="M11.25 13.7732C11.25 14.1878 11.1012 14.5475 10.8037 14.8522C10.5112 15.1519 10.0847 15.3442 9.52438 15.4291V16.2609H8.63182V15.4591C8.25992 15.4341 7.90785 15.3717 7.57562 15.2718C7.24339 15.1669 6.96818 15.0395 6.75 14.8896L7.23347 13.7957C7.46653 13.9505 7.73678 14.0754 8.04422 14.1703C8.35165 14.2652 8.65413 14.3127 8.95165 14.3127C9.51694 14.3127 9.79959 14.1703 9.79959 13.8856C9.79959 13.7357 9.71777 13.6258 9.55413 13.5559C9.39546 13.4809 9.13761 13.4035 8.78058 13.3236C8.38884 13.2387 8.06157 13.1488 7.79876 13.0538C7.53595 12.9539 7.31033 12.7966 7.1219 12.5818C6.93347 12.367 6.83926 12.0772 6.83926 11.7126C6.83926 11.283 6.99298 10.9158 7.30041 10.6111C7.60785 10.3014 8.05165 10.1116 8.63182 10.0416V9.21739H9.52438V10.0266C9.80703 10.0516 10.0773 10.1016 10.3351 10.1765C10.5979 10.2514 10.831 10.3488 11.0343 10.4687L10.5806 11.5702C10.0847 11.3005 9.60372 11.1656 9.1376 11.1656C8.84504 11.1656 8.63182 11.2105 8.49794 11.3005C8.36405 11.3854 8.29711 11.4978 8.29711 11.6377C8.29711 11.7775 8.37645 11.8824 8.53513 11.9524C8.6938 12.0223 8.94918 12.0947 9.30124 12.1697C9.69794 12.2546 10.0252 12.347 10.2831 12.4469C10.5459 12.5418 10.7715 12.6967 10.9599 12.9115C11.1533 13.1213 11.25 13.4085 11.25 13.7732Z" fill="currentcolor"></path>
+                        </svg> Hướng dẫn trả góp</a>
+                </li>
+                <!-- Tra cứu bảo hành -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: black;">
+                        <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.95771 1.78875C3.86924 2.08404 2.78817 2.40514 1.71543 2.75175C1.61748 2.78298 1.5304 2.84067 1.46413 2.91824C1.39785 2.99581 1.35504 3.09015 1.34058 3.1905C0.707434 7.86713 2.17029 11.2793 3.91543 13.527C4.6543 14.4882 5.53532 15.335 6.52914 16.0391C6.92457 16.3136 7.27428 16.5116 7.54971 16.6388C7.68685 16.7029 7.79885 16.7456 7.88457 16.7715C7.92205 16.7844 7.9607 16.7939 7.99999 16.7996C8.03882 16.7934 8.07705 16.784 8.11428 16.7715C8.20114 16.7456 8.31314 16.7029 8.45028 16.6388C8.72457 16.5116 9.07542 16.3125 9.47085 16.0391C10.4647 15.335 11.3457 14.4882 12.0846 13.527C13.8297 11.2804 15.2926 7.86713 14.6594 3.1905C14.6451 3.0901 14.6023 2.99571 14.536 2.91811C14.4697 2.84052 14.3826 2.78287 14.2846 2.75175C13.5406 2.51213 12.2846 2.12175 11.0423 1.78987C9.77371 1.45125 8.60685 1.20038 7.99999 1.20038C7.39428 1.20038 6.22628 1.45012 4.95771 1.78875ZM4.65371 0.63C5.89371 0.298125 7.21142 0 7.99999 0C8.78856 0 10.1063 0.298125 11.3463 0.63C12.6148 0.9675 13.8937 1.36687 14.6457 1.60875C14.9601 1.71096 15.2389 1.8984 15.4499 2.14954C15.661 2.40068 15.7958 2.70533 15.8388 3.0285C16.52 8.06513 14.9394 11.7979 13.0217 14.2673C12.2085 15.3236 11.2388 16.2538 10.1451 17.0269C9.76695 17.2944 9.36626 17.5296 8.94742 17.73C8.62742 17.8785 8.28342 18 7.99999 18C7.71657 18 7.37371 17.8785 7.05257 17.73C6.63373 17.5296 6.23303 17.2944 5.85486 17.0269C4.76117 16.2538 3.79152 15.3236 2.97829 14.2673C1.06058 11.7979 -0.519993 8.06513 0.161149 3.0285C0.20422 2.70533 0.339026 2.40068 0.550082 2.14954C0.761137 1.8984 1.03988 1.71096 1.35429 1.60875C2.44594 1.25641 3.54606 0.930065 4.65371 0.63Z" fill="currentcolor"></path>
+                            <path d="M11.2618 5.78928C11.315 5.84153 11.3572 5.9036 11.386 5.97194C11.4148 6.04028 11.4297 6.11354 11.4297 6.18753C11.4297 6.26152 11.4148 6.33478 11.386 6.40312C11.3572 6.47145 11.315 6.53353 11.2618 6.58578L7.83322 9.96078C7.78014 10.0132 7.71708 10.0547 7.64765 10.0831C7.57823 10.1114 7.50381 10.126 7.42865 10.126C7.35348 10.126 7.27906 10.1114 7.20964 10.0831C7.14021 10.0547 7.07715 10.0132 7.02407 9.96078L5.30979 8.27328C5.25666 8.22098 5.21452 8.15889 5.18576 8.09056C5.15701 8.02223 5.14221 7.94899 5.14221 7.87503C5.14221 7.80107 5.15701 7.72783 5.18576 7.6595C5.21452 7.59117 5.25666 7.52908 5.30979 7.47678C5.36292 7.42448 5.42599 7.38299 5.49541 7.35469C5.56483 7.32639 5.63923 7.31182 5.71436 7.31182C5.7895 7.31182 5.8639 7.32639 5.93331 7.35469C6.00273 7.38299 6.0658 7.42448 6.11893 7.47678L7.42865 8.76715L10.4526 5.78928C10.5057 5.73689 10.5688 5.69533 10.6382 5.66698C10.7076 5.63862 10.782 5.62402 10.8572 5.62402C10.9324 5.62402 11.0068 5.63862 11.0762 5.66698C11.1456 5.69533 11.2087 5.73689 11.2618 5.78928Z" fill="currentcolor"></path>
+                        </svg> Tra cứu bảo hành</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="breadcrumb-container">
+    <ul class="breadcrumb">
+        <li><a th:href="@{/}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house"
+                 viewBox="0 0 16 16">
+                <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
+            </svg>
+            Trang chủ</a></li>
+        <li><a th:text="${category.name}">Category Name</a>
+<!--            th:href="@{'/category/' + ${category.id}}"-->
+        </li>
+    </ul>
+</div>
+
+
+<div class="container">
+<!--    <h1 class="mt-4 mb-4" th:text="'Sản phẩm thuộc danh mục: ' + ${categoryName}"></h1>-->
+    <div class="row">
+        <div class="col-md-3">
+<!--            <h2>Danh mục</h2>-->
+<!--            <ul>-->
+<!--                <li th:each="category : ${categories}">-->
+<!--                    <a th:href="@{/collections/{categoryName}(categoryName=${category.name})}" th:text="${category.name}"></a>-->
+<!--                </li>-->
+<!--            </ul>-->
+            <div class="navigation-bar">
+                <ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle">Hãng</a>
+                        <ul class="dropdown-menu">
+                            <li th:each="brand : ${brands}">
+                                <a th:href="@{/collections/{categoryName}(categoryName=${categoryName}, brandName=${brand.name})}"
+                                   th:class="${brand.name == selectedBrand ? 'selected' : ''}"
+                                   th:text="${brand.name}"></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+
+        </div>
+        <!-- Featured Products -->
+        <section class="container my-5">
+            <h2 class="text-center mb-4">Danh sách sản phẩm</h2>
+            <div class="row">
+                <div th:each="product : ${products}" class="col-md-2 mb-4">
+                    <div class="card product-card">
+                        <a th:href="@{/products/detail/{id}(id=${product.id})}" class="card product-card text-decoration-none" style="border: none">
+                            <img th:src="@{${product.URLImage}}" class="card-img-top" alt="Product Image" style="max-width: 200px; max-height: 200px;">
+                            <div class="card-body text-center">
+                                <h5 class="card-title product-title" style="font-size: 14px; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; display: -webkit-box;" th:text="${product.name}"></h5>
+                                <p class="card-text" th:text="${'Loại: '+ product.category.name}"></p>
+                                <p class="card-text" th:text="${'Hãng: ' + product.brand.name}"></p>
+                                <p class="card-text"><strong>Giá: </strong><span style="color: red; font-size: 18px; font-weight: 600" th:text="${product.formattedPrice}"></span></p>
+                                <a th:href="@{/products/detail/{id}(id=${product.id})}" class="btn btn-primary mr-2">Xem chi tiết</a>
+
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer-custom">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <h7>VỀ GEARVN</h7>
+                <ul>
+                    <li><a href="https://gearvn.com/pages/gioi-thieu-gearvn">Giới thiệu</a></li>
+                    <li><a href="https://tuyendung.gearvn.com/">Tuyển dụng</a></li>
+                </ul>
+            </div>
+            <div class="col-md-2">
+                <h7>CHÍNH SÁCH</h7>
+                <ul>
+                    <li><a href="https://gearvn.com/pages/bao-hanh">Chính sách bảo hành</a></li>
+                    <li><a href="https://gearvn.com/pages/huong-dan-thanh-toan-gearvn">Chính sách thanh toán</a></li>
+                    <li><a href="https://gearvn.com/pages/chinh-sach-van-chuyen">Chính sách giao hàng</a></li>
+                    <li><a href="https://gearvn.com/pages/chinh-sach-bao-mat">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="col-md-2">
+                <h7>THÔNG TIN</h7>
+                <ul>
+                    <li><a href="https://gearvn.com/pages/he-thong-showroom-gearvn">Hệ thống cửa hàng</a></li>
+                    <li><a href="https://gearvn.com/pages/huong-dan-mua-hang">Hướng dẫn mua hàng</a></li>
+                    <li><a href="https://gearvn.com/pages/trung-tam-ho-tro-tra-cuu-thong-tin-bao-hanh-san-pham-chinh-hang">Tra cứu địa chỉ bảo hành</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h7>TỔNG ĐÀI HỖ TRỢ (8:00 - 21:00)</h7>
+                <ul>
+                    <li>Mua hàng: <a href="tel:19005301">1900.5301</a></li>
+                    <li>Bảo hành: <a href="tel:19005325">1900.5325</a></li>
+                    <li>Khiếu nại: <a href="tel:18006173">1800.6173</a></li>
+                    <li>Email: <a href="mailto:cskh@gearvn.com">cskh@gearvn.com</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h7>ĐƠN VỊ VẬN CHUYỂN</h7>
+                <div class="shipping-icons">
+                    <img src="/static/ava/ghn.webp" alt="GHN">
+                    <img src="/static/ava/ems.webp" alt="EMS">
+                    <img src="/static/ava/gvn.webp" alt="GVN">
+                    <img src="/static/ava/viettelpost.webp" alt="Viettel Post">
+                </div>
+                <h7>CÁCH THỨC THANH TOÁN</h7>
+                <div class="payment-icons">
+                    <img src="/static/ava/internetbanking.webp" alt="Internet Banking">
+                    <img src="/static/ava/jcb.webp" alt="JCB">
+                    <img src="/static/ava/mastercard.webp" alt="MasterCard">
+                    <img src="/static/ava/visa.webp" alt="Visa">
+                    <img src="/static/ava/zalopay.webp" alt="ZaloPay">
+                    <img src="/static/ava/momo.webp" alt="MoMo">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h7>KẾT NỐI VỚI CHÚNG TÔI</h7>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/gearvnhcm"><img src="/static/ava/facebook.png" alt="Facebook"></a>
+                    <a href="https://www.tiktok.com/@gearvn.store"><img src="/static/ava/tiktok.png" alt="TikTok"></a>
+                    <a href="https://www.youtube.com/c/GEARVNofficial/videos"><img src="/static/ava/youtube.webp" alt="YouTube"></a>
+                    <a href="https://zalo.me/450955578960321912"><img src="/static/ava/zalo.webp" alt="Zalo"></a>
+                    <a href="https://www.facebook.com/groups/VietnamGamingConner"><img src="/static/ava/group.png" alt="Lotus"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<script>
+    var imageSources = [
+        "/static/ava/bannerTop2.webp",
+        "/static/ava/bannerTop3.webp"
+    ];
+
+    var currentIndex = 0;
+    var intervalTime = 3000;
+
+    function changeImage() {
+        document.getElementById('bannerImage').src = imageSources[currentIndex];
+        currentIndex++;
+        if (currentIndex >= imageSources.length) {
+            currentIndex = 0;
+        }
+    }
+
+    setInterval(changeImage, intervalTime);
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

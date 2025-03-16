@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}">
+<head>
+    <title>Add Product Inventory</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<section layout:fragment="content" class="container mt-5">
+    <h1>Add New Product Inventory</h1>
+    <form th:action="@{/product-inventories/add}" th:object="${productInventory}" method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label for="product" class="form-label">Product:</label>
+            <select th:field="*{product}" class="form-control" id="product" required>
+                <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.name}"></option>
+            </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('product')}" th:errors="*{product}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Quantity:</label>
+            <input type="number" th:field="*{quantity}" class="form-control" id="quantity" required>
+            <div class="text-danger" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="quantitySold" class="form-label">Quantity Sold:</label>
+            <input type="number" th:field="*{quantitySold}" class="form-control" id="quantitySold" required>
+            <div class="text-danger" th:if="${#fields.hasErrors('quantitySold')}" th:errors="*{quantitySold}"></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a th:href="@{/product-inventories}" class="btn btn-link">Cancel</a>
+    </form>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

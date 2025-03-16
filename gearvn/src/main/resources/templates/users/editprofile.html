@@ -1,0 +1,99 @@
+<!-- Thymeleaf template for edit-profile.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <!-- Custom styles -->
+    <style>
+        body {
+            background: #f7f7ff;
+            margin-top: 20px;
+        }
+
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 0 solid transparent;
+            border-radius: .25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 6px 0 rgba(218, 218, 253, 0.65), 0 2px 6px 0 rgba(206, 206, 238, 0.54);
+        }
+
+        .me-2 {
+            margin-right: .5rem !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="main-body" style="margin-top: 150px;">
+        <div class="container-fluid mb-5 wow fadeIn" data-wow-delay="0.1s" style="padding: 35px;">
+            <div class="container">
+                <div class="row g-2">
+                    <h1 style="text-align:center">Chỉnh sửa thông tin cá nhân</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <form th:action="@{/edit-profile}" th:object="${user}" method="post">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Họ tên</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" class="form-control" th:field="*{username}" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Mật khẩu</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" class="form-control" th:field="*{password}" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Email</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="email" class="form-control" th:field="*{email}" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">SDT</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="number" class="form-control" th:field="*{phone}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="submit" class="btn btn-primary px-4" value="Lưu">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}">
+<head>
+    <title>Update Review</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<section layout:fragment="content" class="container mt-5">
+    <h1>Update Review</h1>
+    <form th:action="@{/reviews/update/{id}(id=${review.id})}" th:object="${review}" method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label for="product" class="form-label">Product:</label>
+            <select th:field="*{product}" class="form-control" id="product" required>
+                <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.name}" th:selected="${product.id == review.product.id}"></option>
+            </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('product')}" th:errors="*{product}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="user" class="form-label">User:</label>
+            <select th:field="*{user}" class="form-control" id="user" required>
+                <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}" th:selected="${user.id == review.user.id}"></option>
+            </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('user')}" th:errors="*{user}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">Content:</label>
+            <textarea th:field="*{content}" class="form-control" id="content" required></textarea>
+            <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="rating" class="form-label">Rating:</label>
+            <input type="number" th:field="*{rating}" class="form-control" id="rating" required>
+            <div class="text-danger" th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}"></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a th:href="@{/reviews}" class="btn btn-link">Cancel</a>
+    </form>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

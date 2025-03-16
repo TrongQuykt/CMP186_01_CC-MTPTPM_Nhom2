@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tạo tài khoản quản lý</title>
+</head>
+<body>
+<h1>Tạo tài khoản quản lý</h1>
+<form th:action="@{/admin/createadmin}" th:object="${user}" method="post">
+    <div>
+        <label for="username">Tên đăng nhập:</label>
+        <input type="text" id="username" th:field="*{username}" required>
+    </div>
+    <div>
+        <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" th:field="*{password}" required>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}" required>
+    </div>
+    <div>
+        <label for="phone">Số điện thoại:</label>
+        <input type="text" id="phone" th:field="*{phone}" required>
+    </div>
+    <div>
+        <label for="roles">Chức vụ:</label>
+        <select id="roles" th:field="*{roles}">
+            <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+        </select>
+    </div>
+    <button type="submit">Tạo</button>
+</form>
+<div th:if="${errorMessage}">
+    <p th:text="${errorMessage}"></p>
+</div>
+<div th:if="${successMessage}">
+    <p th:text="${successMessage}"></p>
+</div>
+<a href="/admin/adminuserslist">Quay lại danh sách người dùng</a>
+</body>
+</html>
