@@ -50,7 +50,7 @@ public class SecurityConfig {
         userService.setPasswordEncoder(passwordEncoder());  // Set password encoder
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**","/static/**", "/fonts/", "/", "/oauth/**", "/register","/profile", "/error", "/products/**","/products/search/", "/cart", "/cart/**", "/order", "/order/**", "/checkout/**", "/collections/**", "/forgot-password/**", "/reset-password/**")
+                        .requestMatchers("/css/**", "/js/**", "/images/**","/static/**", "/fonts/", "/", "/oauth/**", "/register","/profile", "/error", "/products/**","/products/search/", "/cart", "/cart/**", "/order", "/order/**", "/checkout/**", "/collections/**", "/forgot-password/**", "/reset-password/**", "/chat/**", "/app/**")
                         .permitAll()
 
                         .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
