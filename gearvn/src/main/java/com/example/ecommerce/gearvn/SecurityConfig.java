@@ -88,7 +88,7 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .accessDeniedPage("/login")
-                        .authenticationEntryPoint(new Http403ForbiddenEntryPoint())  // Thêm dòng này để xử lý yêu cầu AJAX
+                        .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         .maximumSessions(1)
