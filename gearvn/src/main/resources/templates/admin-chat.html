@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <title>Admin Chatbox</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #333333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .chat-container {
+            width: 800px;
+            height: 600px;
+            display: flex;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #fff;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            color: #d32f2f;
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #f5f5f5;
+        }
+
+        .sidebar ul li.active {
+            background-color: #ffebee;
+            font-weight: bold;
+        }
+
+        .user-preview {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #d32f2f;
+        }
+
+        .last-message {
+            font-size: 12px;
+            color: #757575;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        #chat-box {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-container {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-container.sent {
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.message-container.received {
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.message-header {
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 2px;
+    color: #757575;
+}
+
+.message-body {
+    padding: 8px 12px;
+    border-radius: 15px; /* Bo tròn tất cả các góc */
+    word-wrap: break-word;
+    display: inline-block; /* Tự động điều chỉnh chiều rộng theo nội dung */
+    white-space: pre-wrap; /* Giữ định dạng và xuống dòng tự nhiên */
+}
+
+.message-container.sent .message-body {
+    background-color: #d32f2f;
+    color: #fff;
+}
+
+.message-container.received .message-body {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.message-footer {
+    font-size: 10px;
+    color: #999;
+    margin-top: 2px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.message-container.sent .message-footer {
+    justify-content: flex-end;
+}
+
+.message-container.received .message-footer {
+    justify-content: flex-start;
+}
+
+.status {
+    color: #00FF33;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        #message {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 8px 15px;
+            margin-left: 10px;
+            border: none;
+            background-color: #d32f2f;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #d32f2f;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.5s, fadeOut 0.5s 6s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="sidebar">
+        <h2>Danh sách tài khoản</h2>
+        <ul id="users"></ul>
+    </div>
+    <div class="chat-area">
+        <div id="chat-box"></div>
+        <div class="input-area">
+            <input type="text" id="message" placeholder="Type a message...">
+            <button id="sendButton" disabled>Send</button>
+        </div>
+    </div>
+</div>
+<!-- Notification -->
+<div id="notification" class="notification"></div>
+<script>
+    var socket = new SockJS('/chat');
+    var stompClient = Stomp.over(socket);
+    var selectedUserId = null;
+
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        document.getElementById('sendButton').disabled = false;
+        stompClient.subscribe('/user/queue/messages', function (messageOutput) {
+            var message = JSON.parse(messageOutput.body);
+            if (selectedUserId && (message.senderId == selectedUserId || message.receiverId == selectedUserId)) {
+                showMessage(message);
+                updateLastMessage(message);
+            } else {
+                // Hiển thị notification nếu tin nhắn không thuộc cuộc trò chuyện đang chọn
+                showNotification(message);
+            }
+        });
+
+        fetch('/api/users-with-messages')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load users: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(users => {
+                const userList = document.getElementById('users');
+                users.forEach(user => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<div class="user-preview"><span class="user-name">${user.username}</span><span class="last-message" data-user-id="${user.id}"></span></div>`;
+                    li.onclick = () => {
+                        document.querySelectorAll('#users li').forEach(item => item.classList.remove('active'));
+                        li.classList.add('active');
+                        selectedUserId = user.id;
+                        loadConversation(user.id);
+                    };
+                    userList.appendChild(li);
+                    loadLastMessage(user.id, li.querySelector('.last-message'));
+                });
+            })
+            .catch(error => {
+                console.error('Error loading users:', error);
+            });
+    }, function (error) {
+        console.error('WebSocket connection error:', error);
+    });
+
+    function sendMessage() {
+        var message = document.getElementById('message').value.trim();
+        if (message && selectedUserId && stompClient && stompClient.connected) {
+            stompClient.send('/app/sendMessage', {}, JSON.stringify({
+                'message': message,
+                'receiverId': selectedUserId
+            }));
+            document.getElementById('message').value = '';
+        } else {
+            console.error("Cannot send message: No user selected, WebSocket not connected, or message empty");
+        }
+    }
+
+    function showMessage(message) {
+        var chatBox = document.getElementById('chat-box');
+        var messageElement = document.createElement('div');
+        messageElement.classList.add('message-container');
+        var isSent = message.senderId == 1; // Giả sử admin ID là 1
+        messageElement.classList.add(isSent ? 'sent' : 'received');
+        // Định dạng timestamp theo múi giờ Việt Nam (Asia/Ho_Chi_Minh)
+        const vietnamTime = new Date(message.timestamp || new Date()).toLocaleString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+        messageElement.innerHTML = `
+            <div class="message-header">${message.username || 'Unknown User'}</div>
+            <div class="message-body">${message.message}</div>
+            <div class="message-footer">
+                <span>${vietnamTime}</span>
+                <span class="status">${message.status || 'Sent'}</span>
+            </div>
+        `;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function loadConversation(userId) {
+        fetch(`/api/messages?userId=${userId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load conversation: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(messages => {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = '';
+                messages.forEach(msg => showMessage(msg));
+            })
+            .catch(error => {
+                console.error('Error loading conversation:', error);
+            });
+    }
+
+    function loadLastMessage(userId, element) {
+        fetch(`/api/latest-message?userId=${userId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load last message: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(message => {
+                if (message) {
+                    const vietnamTime = new Date(message.timestamp || new Date()).toLocaleString('vi-VN', {
+                        timeZone: 'Asia/Ho_Chi_Minh',
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    element.textContent = `${message.message} (${vietnamTime})`;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading last message:', error);
+            });
+    }
+
+    function updateLastMessage(message) {
+        const elements = document.querySelectorAll(`.last-message[data-user-id="${message.senderId}"], .last-message[data-user-id="${message.receiverId}"]`);
+        const vietnamTime = new Date(message.timestamp || new Date()).toLocaleString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        elements.forEach(element => {
+            element.textContent = `${message.message} (${vietnamTime})`;
+        });
+    }
+
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        const vietnamTime = new Date().toLocaleString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        notification.style.display = 'block';
+        notification.textContent = `Tin nhắn mới từ ${message.username}: ${message.message} (${vietnamTime})`;
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 7000);
+    }
+
+    document.getElementById('sendButton').addEventListener('click', sendMessage);
+    document.getElementById('message').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>

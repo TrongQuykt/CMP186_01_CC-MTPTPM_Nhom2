@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Chatbox</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 10px;
+            background-color: #d32f2f;
+            color: #fff;
+            border-bottom: 1px solid #ddd;
+        }
+        .chat-header strong {
+            color: #fff;
+        }
+        .chat-header span {
+            color: #ffebee;
+        }
+        #chat-box {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+        .message-container {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.sent {
+            align-items: flex-end;
+        }
+        .message.received {
+            align-items: flex-start;
+        }
+        .message-header {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 2px;
+            color: #757575;
+        }
+        .message-body {
+            max-width: 70%;
+            padding: 8px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-bottom: 2px;
+        }
+        .message.sent .message-body {
+            background-color: #d32f2f;
+            color: #fff;
+            border-bottom-right-radius: 5px; /* Bo góc Messenger-style */
+        }
+        .message.received .message-body {
+            background-color: #f5f5f5;
+            color: #333;
+            border-bottom-left-radius: 5px; /* Bo góc Messenger-style */
+        }
+        .message-footer {
+            font-size: 10px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .message.sent .message-footer {
+            justify-content: flex-end;
+        }
+        .message.received .message-footer {
+            justify-content: flex-start;
+        }
+        .status {
+            color: #4caf50; /* Màu xanh lá cho trạng thái */
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #fff;
+        }
+        #message {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        button {
+            padding: 8px 15px;
+            margin-left: 10px;
+            border: none;
+            background-color: #d32f2f;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        <strong>Tài Khoản: </strong><span th:text="${username}" id="current-username"></span><br>
+<!--        <strong>Role: </strong><span th:text="${role}"></span>-->
+    </div>
+    <div id="chat-box"></div>
+    <div class="input-area">
+        <input type="text" id="message" placeholder="Type a message...">
+        <button id="sendButton">Send</button>
+    </div>
+</div>
+
+<script>
+    var socket = new SockJS('/chat');
+    var stompClient = Stomp.over(socket);
+    // Lấy username từ DOM sau khi Thymeleaf render
+    var currentUsername = document.getElementById('current-username').textContent;
+
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        document.getElementById('sendButton').disabled = false;
+        stompClient.subscribe('/user/queue/messages', function (messageOutput) {
+            showMessage(JSON.parse(messageOutput.body));
+        });
+
+        // Tải lịch sử tin nhắn khi vào chat
+        fetch('/api/user/messages')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load messages: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(messages => {
+                messages.forEach(msg => showMessage(msg));
+            })
+            .catch(error => {
+                console.error('Error loading messages:', error);
+            });
+    }, function (error) {
+        console.error('WebSocket connection error:', error);
+    });
+
+    function sendMessage() {
+        var message = document.getElementById("message").value.trim();
+        if (message && stompClient && stompClient.connected) {
+            stompClient.send("/app/sendMessage", {}, JSON.stringify({'message': message}));
+            document.getElementById("message").value = '';
+        } else {
+            console.error("Cannot send message: WebSocket not connected or message empty");
+        }
+    }
+
+    function showMessage(message) {
+        var chatBox = document.getElementById("chat-box");
+        var messageElement = document.createElement('div');
+        messageElement.classList.add('message-container');
+        var isSent = message.username === currentUsername; // So sánh với username hiện tại
+        messageElement.classList.add(isSent ? 'sent' : 'received');
+        messageElement.innerHTML = `
+            <div class="message-header">${message.username || 'Unknown User'}</div>
+            <div class="message-body">${message.message}</div>
+            <div class="message-footer">
+                <span>${message.timestamp}</span>
+                <span class="status">${message.status}</span>
+            </div>
+        `;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById("sendButton").addEventListener("click", sendMessage);
+    document.getElementById('message').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>

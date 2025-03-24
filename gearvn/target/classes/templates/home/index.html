@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/search.css">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/dist/stomp.min.js"></script>
     <link rel="icon" href="/static/ava/logofavicon.png">
     <meta name="csrf-token" th:content="${_csrf.token}"/>
     <style>
@@ -361,6 +363,207 @@
      flex-direction: column; /* Đặt các phần tử bên trong div theo cột */
  }
 
+    </style>
+    <style>
+        /* Floating chat icon style */
+        #chat-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* Icon styling */
+        #chat-icon svg {
+            fill: white;
+        }
+
+        /* Hover effect */
+        #chat-icon:hover {
+            background-color: #c40000;  /* Darker red on hover */
+        }
+    </style>
+    <style>
+        /* Cố định vị trí của chatbox */
+.chatbox-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    height: 450px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.chatbox-header {
+    background-color: #ff0000;
+    color: white;
+    padding: 12px 15px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.chatbox-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.chatbox-close-btn:hover {
+    transform: scale(1.2);
+}
+
+.chatbox-body {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cải thiện bố cục tin nhắn giống Messenger */
+.message-container {
+    margin: 5px 0;
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+}
+
+.message-container.sent {
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.message-container.received {
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.message-header {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 4px;
+    display: none; /* Ẩn mặc định, chỉ hiển thị khi cần */
+}
+
+.message-header.show {
+    display: block; /* Hiển thị khi tin nhắn từ người khác hoặc tin nhắn đầu tiên */
+}
+
+.message-body {
+    padding: 8px 12px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    display: inline-block;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.message-container.sent .message-body {
+    background-color: #ff0000;
+    color: white;
+    border-bottom-right-radius: 4px; /* Góc dưới bên phải phẳng hơn */
+}
+
+.message-container.received .message-body {
+    background-color: #e0e0e0;
+    color: black;
+    border-bottom-left-radius: 4px; /* Góc dưới bên trái phẳng hơn */
+}
+
+/* Nếu tin nhắn liên tiếp từ cùng một người, giảm khoảng cách */
+.message-container:not(:first-child).same-sender {
+    margin-top: 2px;
+}
+
+.message-footer {
+    font-size: 10px;
+    color: #777;
+    margin-top: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message-container.sent .message-footer {
+    justify-content: flex-end;
+}
+
+.message-container.received .message-footer {
+    justify-content: flex-start;
+}
+
+.status {
+    color: #00FF33;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+.chatbox-input {
+    display: flex;
+    padding: 10px 15px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #fff;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.chatbox-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.chatbox-input input:focus {
+    border-color: #ff0000;
+}
+
+.chatbox-input button {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.chatbox-input button:hover {
+    background-color: #e60000;
+}
+
+.chatbox-input button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
     </style>
 </head>
 <body>
@@ -959,6 +1162,12 @@
     </div>
 </section>
 
+
+
+<!-- Floating chat icon -->
+<div id="chat-icon">
+    🗨️
+</div>
 <!-- Footer -->
 <footer class="footer-custom">
     <div class="container">
@@ -1029,7 +1238,172 @@
         </div>
     </div>
 </footer>
+<!-- Inline Chatbox -->
+<div id="inline-chatbox" class="chatbox-container">
+    <div class="chatbox-header">
+        <span>GEARVN - Chat với chúng tôi</span>
+        <button class="chatbox-close-btn" onclick="closeChatbox()">✕</button>
+    </div>
+    <div id="chat-box" class="chatbox-body"></div>
+    <div class="chatbox-input">
+        <input id="message" type="text" placeholder="Nhập nội dung...">
+        <button id="sendButton" disabled>Gửi</button>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    // Hiển thị/ẩn khung chatbox khi nhấp vào biểu tượng chat
+    function toggleChatbox() {
+        var chatbox = document.getElementById('inline-chatbox');
+        if (chatbox.style.display === 'flex') {
+            chatbox.style.display = 'none';
+        } else {
+            chatbox.style.display = 'flex';
+            loadConversation(); // Tải cuộc trò chuyện khi mở chatbox
+        }
+    }
 
+    // Đóng chatbox
+    function closeChatbox() {
+        document.getElementById('inline-chatbox').style.display = 'none';
+    }
+
+    // Gán sự kiện cho chat-icon
+    document.getElementById('chat-icon').onclick = toggleChatbox;
+</script>
+<script th:inline="javascript">
+    var userId = [[${userId}]];
+        var username = [[${username}]];
+        var stompClient = null;
+        var lastSenderId = null; // Biến để lưu ID của người gửi trước đó
+
+        function showMessage(message) {
+            var chatBox = document.getElementById('chat-box');
+            var messageElement = document.createElement('div');
+            messageElement.classList.add('message-container');
+            var isSent = message.senderId == userId;
+            messageElement.classList.add(isSent ? 'sent' : 'received');
+
+            // Kiểm tra xem tin nhắn có phải từ cùng một người gửi không
+            if (lastSenderId === message.senderId) {
+                messageElement.classList.add('same-sender');
+            } else {
+                messageElement.querySelector('.message-header')?.classList.add('show');
+            }
+            lastSenderId = message.senderId; // Cập nhật người gửi cuối cùng
+
+            // Định dạng timestamp theo múi giờ Việt Nam
+            const vietnamTime = new Date(message.timestamp || new Date()).toLocaleString('vi-VN', {
+                timeZone: 'Asia/Ho_Chi_Minh',
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            messageElement.innerHTML = `
+                <div class="message-header show">${message.username || 'Unknown User'}</div>
+                <div class="message-body">${message.message}</div>
+                <div class="message-footer">
+                    <span>${vietnamTime}</span>
+                    <span class="status">${message.status || 'Sent'}</span>
+                </div>
+            `;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function loadConversation() {
+            if (!userId || userId === 0) {
+                console.error('User ID is not available. Please log in.');
+                alert('Vui lòng đăng nhập để sử dụng chat.');
+                return;
+            }
+            fetch(`/api/user/messages`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load conversation: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(messages => {
+                    const chatBox = document.getElementById('chat-box');
+                    chatBox.innerHTML = '';
+                    lastSenderId = null; // Reset lastSenderId khi tải lại cuộc trò chuyện
+                    messages.forEach(msg => showMessage(msg));
+                })
+                .catch(error => {
+                    console.error('Error loading conversation:', error);
+                    alert('Không thể tải cuộc trò chuyện. Vui lòng thử lại sau.');
+                });
+        }
+
+        function sendMessage() {
+            var message = document.getElementById('message').value.trim();
+            if (message && stompClient && stompClient.connected) {
+                stompClient.send('/app/sendMessage', {}, JSON.stringify({
+                    'message': message,
+                    'senderId': userId,
+                    'receiverId': 1, // Gửi đến admin (ID 1)
+                    'username': username
+                }));
+                document.getElementById('message').value = '';
+            } else {
+                console.error("Cannot send message: WebSocket not connected or message empty");
+            }
+        }
+
+        function toggleChatbox() {
+            var chatbox = document.getElementById('inline-chatbox');
+            var chatIcon = document.getElementById('chat-icon');
+            if (chatbox.style.display === 'flex') {
+                chatbox.style.display = 'none';
+                chatIcon.style.display = 'flex';
+            } else {
+                chatbox.style.display = 'flex';
+                chatIcon.style.display = 'none';
+                loadConversation();
+            }
+        }
+
+        function closeChatbox() {
+            var chatbox = document.getElementById('inline-chatbox');
+            var chatIcon = document.getElementById('chat-icon');
+            chatbox.style.display = 'none';
+            chatIcon.style.display = 'flex';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var socket = new SockJS('/chat');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                document.getElementById('sendButton').disabled = false;
+                stompClient.subscribe('/user/queue/messages', function (messageOutput) {
+                    var message = JSON.parse(messageOutput.body);
+                    if (message.senderId == 1 || message.receiverId == 1) {
+                        showMessage(message);
+                    }
+                });
+            }, function (error) {
+                console.error('WebSocket connection error:', error);
+            });
+
+            document.getElementById('chat-icon').onclick = toggleChatbox;
+            document.getElementById('sendButton').addEventListener('click', sendMessage);
+            document.getElementById('message').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+</script>
 
 <script>
     var imageSources = [
