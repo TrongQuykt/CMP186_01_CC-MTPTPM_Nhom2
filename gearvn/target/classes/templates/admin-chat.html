@@ -382,6 +382,7 @@
             element.textContent = `${message.message} (${vietnamTime})`;
         });
     }
+    
 
     function showNotification(message) {
         const notification = document.getElementById('notification');
@@ -397,6 +398,7 @@
             notification.style.display = 'none';
         }, 7000);
     }
+
 
     document.getElementById('sendButton').addEventListener('click', sendMessage);
     document.getElementById('message').addEventListener('keypress', function (e) {
